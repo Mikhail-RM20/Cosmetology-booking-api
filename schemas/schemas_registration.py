@@ -32,26 +32,26 @@ class RegistrationIn(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, value: str) -> str:
-        # 1. Email вообще передан?
+
         if not value:
             raise ValueError("Email обязателен")
 
-        # 2. Есть ли собачка?
+
         if "@" not in value:
             raise ValueError("Email должен содержать символ @")
 
-        # 3. Собачка должна быть одна
+
         if value.count("@") != 1:
             raise ValueError("Email должен содержать только один символ @")
 
-        # 4. Разделяем на логин и домен
+
         username, domain = value.split("@")
 
-        # 5. Логин не должен быть пустым
+
         if not username:
             raise ValueError("Укажите имя пользователя перед @")
 
-        # 6. Домен должен быть mail.ru
+
         if domain.lower() != "mail.ru":
             raise ValueError("Разрешена только почта @mail.ru")
 

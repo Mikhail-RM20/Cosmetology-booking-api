@@ -8,8 +8,8 @@ from core import hash_password
 
 async def create_new_user(db: AsyncSession, user_info: RegistrationIn) -> int:
     try:
-        name = user_info.name
-        surname = user_info.surname
+        name = user_info.name.title()
+        surname = user_info.surname.title()
         phone = user_info.phone
         password = user_info.password
         email = user_info.email

@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Literal
 
 class LogIn(BaseModel):
     phone: str = Field(
@@ -20,4 +21,8 @@ class LogOut(BaseModel):
     refresh_token: str = Field(
         ...,
         title="Refresh - токен.",
+    )
+    token_type: Literal["bearer"] = Field(
+        default="bearer",
+        title="Тип токена",
     )
