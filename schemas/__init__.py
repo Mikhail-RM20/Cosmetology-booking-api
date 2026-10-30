@@ -1,6 +1,7 @@
 from .schemas_registration import RegistrationIn, RegistrationOut
 from .schemas_login import LogIn, LogOut
-from .schemas_entry import EntryIn, EntryOut
+from .schemas_entry import EntryIn, EntryOut, Entries
+from .schemas_procedure import ProcedureOut
 
 __all__ = [
     "RegistrationIn",
@@ -9,4 +10,6 @@ __all__ = [
     "LogOut",
     "EntryIn",
     "EntryOut",
+    "ProcedureOut",
+    "Entries"
 ]

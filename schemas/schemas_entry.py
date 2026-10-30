@@ -15,8 +15,6 @@ ENTRY_TIMES = {
 class EntryIn(BaseModel):
     procedure_id: int = Field(
         ...,
-        min_length=2,
-        max_length=50,
         title="ID - процедуры."
     )
     entry_date: date = Field(
@@ -60,4 +58,24 @@ class EntryOut(BaseModel):
     message: str = Field(
         ...,
         title="Сообщение о регистрации."
+    )
+
+class Entries(EntryIn):
+    """Pydantic - схема возвращающая данные о бронировании администратору по запросу."""
+
+    id: int = Field(
+        ...,
+        title="ID - брони."
+    )
+    name_user: str = Field(
+        ...,
+        title="Имя человека"
+    )
+    surname_user: str = Field(
+        ...,
+        title="Фамилия человека"
+    )
+    price: int = Field(
+        ...,
+        title="Цена за процедуру."
     )
