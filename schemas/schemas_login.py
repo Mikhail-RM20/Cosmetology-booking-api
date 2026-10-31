@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from typing import Literal
+
+from pydantic import BaseModel, Field
+
 
 class LogIn(BaseModel):
     phone: str = Field(
@@ -12,6 +14,7 @@ class LogIn(BaseModel):
         title="Пароль человека.",
         min_length=8,
     )
+
 
 class LogOut(BaseModel):
     access_token: str = Field(

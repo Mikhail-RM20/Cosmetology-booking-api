@@ -1,12 +1,12 @@
 import hashlib
+from datetime import UTC, datetime, timedelta
 
+import jwt
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core import config_set
-import jwt
-from datetime import datetime, timedelta, timezone
 from database import TokenUser
 
 # Класс, для работы с токенами.
@@ -16,8 +16,7 @@ from database import TokenUser
 # Метод 4: проверяет access - токен для работы с роутами.
 
 
-
-class WorkTokens():
+class WorkTokens:
     def __init__(self):
         # Берем данные из Pydantic-settings
 
@@ -26,8 +25,9 @@ class WorkTokens():
         self.access_token_expire_minutes = config_set.access_token_expire_minutes
         self.refresh_token_expire_days = config_set.refresh_token_expire_days
 
-
-    async def pair_generation_access_refresh(self, db: AsyncSession, id_user: int) -> tuple[str, str]:
+    async def pair_generation_access_refresh(
+        self, db: AsyncSession, id_user: int
+    ) -> tuple[str, str]:
 
         # "sub" - subject, сохраняет id - пользователя.
         # "iat" - issued at, время создания токена.
@@ -36,7 +36,7 @@ class WorkTokens():
         # "now" - текущее время.
 
         try:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
             access = {
                 "sub": str(id_user),
@@ -44,7 +44,6 @@ class WorkTokens():
                 "exp": now + timedelta(minutes=self.access_token_expire_minutes),
                 "type": "access",
             }
-
 
             refresh = {
                 "sub": str(id_user),
@@ -56,7 +55,9 @@ class WorkTokens():
             # Подписываем access и refresh, по секретному ключу и алгоритму.
 
             access_token = jwt.encode(access, self.secret_key, algorithm=self.algorithm)
-            refresh_token = jwt.encode(refresh, self.secret_key, algorithm=self.algorithm)
+            refresh_token = jwt.encode(
+                refresh, self.secret_key, algorithm=self.algorithm
+            )
 
             # Хешируем refresh, чтобы добавить его в БД.
             refresh_token_hash = hashlib.sha256(
@@ -79,27 +80,25 @@ class WorkTokens():
         except jwt.exceptions.InvalidKeyError as error:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Секретный ключ неправильного формата или не подходит для алгоритма."
+                detail="Секретный ключ неправильного формата или не подходит для алгоритма.",
             ) from error
 
         except jwt.exceptions.InvalidAlgorithmError as error:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Указан неизвестный или неподдерживаемый алгоритм."
+                detail="Указан неизвестный или неподдерживаемый алгоритм.",
             ) from error
 
         except NotImplementedError as error:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Алгоритм требует пакет <cryptography>, но он не установлен."
+                detail="Алгоритм требует пакет <cryptography>, но он не установлен.",
             ) from error
 
     def check_access_token(self, access_token: str) -> int:
         try:
             payload = jwt.decode(
-                access_token,
-                self.secret_key,
-                algorithms=[self.algorithm]
+                access_token, self.secret_key, algorithms=[self.algorithm]
             )
 
             # Проверяем тип токена. Должен быть access.
@@ -119,35 +118,35 @@ class WorkTokens():
 
         except jwt.ExpiredSignatureError as error:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Access - токен истек."
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Access - токен истек."
             ) from error
 
         except jwt.InvalidSignatureError as error:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Токен подделан или подписан другим секретом."
+                detail="Токен подделан или подписан другим секретом.",
             ) from error
 
         except jwt.DecodeError as error:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Access - токен поврежден."
-                                ) from error
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access - токен поврежден.",
+            ) from error
 
         except jwt.InvalidAlgorithmError as error:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="В access - токене обнаружен недопустимый алгоритм."
+                detail="В access - токене обнаружен недопустимый алгоритм.",
             ) from error
 
-    async def rotation_tokens(self, db: AsyncSession, refresh_token: str) -> tuple[str, str]:
+    async def rotation_tokens(
+        self, db: AsyncSession, refresh_token: str
+    ) -> tuple[str, str]:
         try:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
             # Хешируем старый токен, чтобы сравнить его с токкеном из БД.
-            old_token_hash = hashlib.sha256(
-                refresh_token.encode("utf-8")
-            ).hexdigest()
+            old_token_hash = hashlib.sha256(refresh_token.encode("utf-8")).hexdigest()
 
             # Получаем старый refresh-токен.
             result = await db.execute(
@@ -165,17 +164,13 @@ class WorkTokens():
                     detail="Refresh-токен недействителен или истёк.",
                 )
 
-
-
             payload = jwt.decode(
-                refresh_token,
-                self.secret_key,
-                algorithms=[self.algorithm]
+                refresh_token, self.secret_key, algorithms=[self.algorithm]
             )
             if payload.get("type") != "refresh":
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Неверный тип токена."
+                    detail="Неверный тип токена.",
                 )
             user_id = payload.get("sub")
             if user_id is None:
@@ -195,10 +190,12 @@ class WorkTokens():
                 "iat": now,
                 "exp": old_token.expires_at,
                 "type": "refresh",
-             }
+            }
 
             access_token = jwt.encode(access, self.secret_key, algorithm=self.algorithm)
-            refresh_token = jwt.encode(refresh, self.secret_key, algorithm=self.algorithm)
+            refresh_token = jwt.encode(
+                refresh, self.secret_key, algorithm=self.algorithm
+            )
 
             refresh_token_hash = hashlib.sha256(
                 refresh_token.encode("utf-8")
@@ -219,27 +216,25 @@ class WorkTokens():
 
             return access_token, refresh_token
 
-
         except jwt.ExpiredSignatureError as error:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Access - токен истек."
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Access - токен истек."
             ) from error
 
         except jwt.InvalidSignatureError as error:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Токен подделан или подписан другим секретом."
+                detail="Токен подделан или подписан другим секретом.",
             ) from error
 
         except jwt.DecodeError as error:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Access - токен поврежден."
-                                ) from error
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access - токен поврежден.",
+            ) from error
 
         except jwt.InvalidAlgorithmError as error:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="В access - токене обнаружен недопустимый алгоритм."
+                detail="В access - токене обнаружен недопустимый алгоритм.",
             ) from error
-

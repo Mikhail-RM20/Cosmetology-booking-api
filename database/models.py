@@ -1,8 +1,19 @@
 from datetime import datetime
 
-from database import Base
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Time,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, ForeignKey, DateTime, func, Date, Time, Boolean, UniqueConstraint
+
+from database import Base
 
 
 class User(Base):
@@ -30,19 +41,28 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
+
 class Procedures(Base):
     __tablename__ = "procedures"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
     )
     name_procedures: Mapped[str] = mapped_column(String, nullable=False)
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("categories.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     description: Mapped[str] = mapped_column(String, nullable=False)
     price: Mapped[int] = mapped_column(Integer, nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="procedures")
-    entries_cosmetology: Mapped[list["EntryCosmetology"]] = relationship(back_populates="procedure")
+    entries_cosmetology: Mapped[list["EntryCosmetology"]] = relationship(
+        back_populates="procedure"
+    )
+    category: Mapped["Category"] = relationship(back_populates="procedures")
 
 
 class TokenUser(Base):
@@ -83,8 +103,12 @@ class EntryCosmetology(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"),nullable=False)
-    procedure_id: Mapped[int] = mapped_column(ForeignKey("procedures.id", ondelete="CASCADE"),nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    procedure_id: Mapped[int] = mapped_column(
+        ForeignKey("procedures.id", ondelete="CASCADE"), nullable=False
+    )
     entry_date: Mapped[Date] = mapped_column(Date, nullable=False)
     entry_time: Mapped[Time] = mapped_column(Time, nullable=False)
 
@@ -93,3 +117,22 @@ class EntryCosmetology(Base):
     )
     procedure: Mapped["Procedures"] = relationship(back_populates="entries_cosmetology")
 
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    name: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        unique=True,
+    )
+
+    procedures: Mapped[list["Procedures"]] = relationship(
+        back_populates="category",
+    )

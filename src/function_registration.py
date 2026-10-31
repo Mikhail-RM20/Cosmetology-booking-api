@@ -1,10 +1,12 @@
-from sqlalchemy import select
-from sqlalchemy.exc import NoResultFound, SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
-from schemas import RegistrationIn
-from database import User
 from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from core import hash_password
+from database import User
+from schemas import RegistrationIn
+
 
 async def create_new_user(db: AsyncSession, user_info: RegistrationIn) -> int:
     try:
@@ -14,12 +16,15 @@ async def create_new_user(db: AsyncSession, user_info: RegistrationIn) -> int:
         password = user_info.password
         email = user_info.email
 
-        database_query = await db.execute(select(User)
-                                          .where(User.phone == user_info.phone))
+        database_query = await db.execute(
+            select(User).where(User.phone == user_info.phone)
+        )
         result_check_user = database_query.scalar_one_or_none()
         if result_check_user is not None:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                                detail="Пользователь с таким номером уже зарегистрирован.")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Пользователь с таким номером уже зарегистрирован.",
+            )
         hashed_password = hash_password(password)
 
         new_user = User(
@@ -36,8 +41,7 @@ async def create_new_user(db: AsyncSession, user_info: RegistrationIn) -> int:
 
         return new_user.id
 
-
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

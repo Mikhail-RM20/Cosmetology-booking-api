@@ -1,11 +1,13 @@
-from .base import Base, get_db
-from .models import User, TokenUser, EntryCosmetology, Procedures
+from .base import Base, SessionLocal, get_db
+from .models import Category, EntryCosmetology, Procedures, TokenUser, User
 
 __all__ = [
     "Base",
-    "get_db",
-    "User",
-    "TokenUser",
+    "Category",
     "EntryCosmetology",
     "Procedures",
+    "SessionLocal",
+    "TokenUser",
+    "User",
+    "get_db",
 ]

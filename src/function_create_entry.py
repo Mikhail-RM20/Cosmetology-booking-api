@@ -1,10 +1,12 @@
-from sqlalchemy import select
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from sqlalchemy.orm import selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
-from schemas import EntryIn
-from database import User, EntryCosmetology, User, Procedures
 from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from database import EntryCosmetology
+from schemas import EntryIn
+
 
 async def new_entry(db: AsyncSession, entry_data: EntryIn, id_user: int) -> dict:
     try:
@@ -12,16 +14,19 @@ async def new_entry(db: AsyncSession, entry_data: EntryIn, id_user: int) -> dict
         entry_date = entry_data.entry_date
         entry_time = entry_data.entry_time
 
-        check_entry = await db.execute(select(EntryCosmetology)
-                                       .where(EntryCosmetology.entry_date == entry_date,
-                                              EntryCosmetology.entry_time == entry_time))
+        check_entry = await db.execute(
+            select(EntryCosmetology).where(
+                EntryCosmetology.entry_date == entry_date,
+                EntryCosmetology.entry_time == entry_time,
+            )
+        )
         result_check_entry = check_entry.scalar_one_or_none()
 
         if result_check_entry:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Ошибка. Данное окно уже занято."
-                       "\n Выберите другую дату или время."
+                "\n Выберите другую дату или время.",
             )
         new_create = EntryCosmetology(
             user_id=id_user,
@@ -32,10 +37,12 @@ async def new_entry(db: AsyncSession, entry_data: EntryIn, id_user: int) -> dict
         db.add(new_create)
         await db.commit()
 
-        data_entry = await db.execute(select(EntryCosmetology).options(
-            selectinload(EntryCosmetology.procedure),
-            selectinload(EntryCosmetology.user),
-        )
+        data_entry = await db.execute(
+            select(EntryCosmetology)
+            .options(
+                selectinload(EntryCosmetology.procedure),
+                selectinload(EntryCosmetology.user),
+            )
             .where(EntryCosmetology.id == new_create.id)
         )
         result_data_entry = data_entry.scalar_one()
@@ -52,15 +59,14 @@ async def new_entry(db: AsyncSession, entry_data: EntryIn, id_user: int) -> dict
     except HTTPException:
         raise
 
-    except IntegrityError as e:
+    except IntegrityError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="На это время уже есть бронь.",
         )
 
-
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

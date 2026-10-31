@@ -36,33 +36,26 @@ class RegistrationIn(BaseModel):
         if not value:
             raise ValueError("Email обязателен")
 
-
         if "@" not in value:
             raise ValueError("Email должен содержать символ @")
-
 
         if value.count("@") != 1:
             raise ValueError("Email должен содержать только один символ @")
 
-
         username, domain = value.split("@")
-
 
         if not username:
             raise ValueError("Укажите имя пользователя перед @")
-
 
         if domain.lower() != "mail.ru":
             raise ValueError("Разрешена только почта @mail.ru")
 
         return value.lower()
 
+
 class RegistrationOut(BaseModel):
     message: str = Field(
         ...,
         title="Сообщение о регистрации.",
     )
-    id_user: int = Field(
-        ...,
-        title="ID - пользователя."
-    )
+    id_user: int = Field(..., title="ID - пользователя.")
