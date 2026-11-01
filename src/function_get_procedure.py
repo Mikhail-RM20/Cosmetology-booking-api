@@ -1,13 +1,12 @@
 import json
 
+from core import redis_client
+from database import Procedures
 from fastapi import HTTPException, status
 from redis import RedisError
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core import redis_client
-from database import Procedures
 
 
 async def get_procedures(

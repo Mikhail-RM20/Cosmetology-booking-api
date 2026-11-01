@@ -1,11 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from database import get_db
 from dependencies import get_current_access_token, oauth2_scheme
+from fastapi import APIRouter, Depends, status
 from schemas import ProcedureOut
+from sqlalchemy.ext.asyncio import AsyncSession
 from src import get_procedures
 
 router = APIRouter()
@@ -19,7 +18,7 @@ router = APIRouter()
 async def cosmetology_procedures(
     token: Annotated[str, Depends(oauth2_scheme)],
     procedure_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     await get_current_access_token(token=token)
 

@@ -1,3 +1,4 @@
+import asyncio
 from core import config_set, hash_password
 from database import Category, Procedures, SessionLocal, User
 from utils import WorkTokens
@@ -269,9 +270,16 @@ async def generate_base_table():
         # Внутри метода refresh сохраняется в token_users.
         work_tokens = WorkTokens()
 
-        access_token, refresh_token = await work_tokens.pair_generation_access_refresh(
+        await work_tokens.pair_generation_access_refresh(
             db=session,
             id_user=admin.id,
         )
 
         await session.commit()
+
+async def main() -> None:
+    await generate_base_table()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

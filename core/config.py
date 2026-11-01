@@ -61,7 +61,7 @@ class ConfigSetting(BaseSettings):
 # Возвращает объект настройки.
 @lru_cache
 def get_config() -> ConfigSetting:
-    return ConfigSetting()
+    return ConfigSetting()  # type: ignore[call-arg]
 
 
 config_set = get_config()

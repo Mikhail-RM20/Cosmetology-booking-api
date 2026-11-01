@@ -1,11 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from database import get_db
 from dependencies import get_current_access_token, oauth2_scheme
+from fastapi import APIRouter, Depends, status
 from schemas import EntryIn, EntryOut
+from sqlalchemy.ext.asyncio import AsyncSession
 from src import new_entry
 
 router = APIRouter()
@@ -19,10 +18,12 @@ router = APIRouter()
 async def cosmetology_new_entry(
     entry_data: EntryIn,
     token: Annotated[str, Depends(oauth2_scheme)],
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     user_id = await get_current_access_token(token=token)
-    create_entry = await new_entry(db=db, entry_data=entry_data, id_user=user_id)
+    create_entry = await new_entry(
+        db=db, entry_data=entry_data, id_user=user_id
+    )
 
     return EntryOut(
         message=f"{create_entry['user_name']} {create_entry['user_surname']}, вы записаны."

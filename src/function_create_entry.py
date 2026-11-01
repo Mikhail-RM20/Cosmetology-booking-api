@@ -1,16 +1,17 @@
+from database import EntryCosmetology
 from fastapi import HTTPException, status
+from schemas import EntryIn
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from database import EntryCosmetology
-from schemas import EntryIn
 
-
-async def new_entry(db: AsyncSession, entry_data: EntryIn, id_user: int) -> dict:
+async def new_entry(
+    db: AsyncSession, entry_data: EntryIn, id_user: int
+) -> dict:
     try:
-        id_procedure = entry_data.id_procedure
+        id_procedure = entry_data.procedure_id
         entry_date = entry_data.entry_date
         entry_time = entry_data.entry_time
 

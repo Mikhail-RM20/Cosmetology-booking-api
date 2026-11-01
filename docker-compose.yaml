@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cosmetology_postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: cosmetology_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  migrations:
+    build: .
+    container_name: cosmetology_migrations
+    restart: "no"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        echo "Waiting for PostgreSQL..."
+        until python -c "import socket,os,sys; s=socket.socket(); s.settimeout(2); s.connect((os.getenv('POSTGRES_HOST','postgres'), int(os.getenv('POSTGRES_PORT','5432')))); s.close()" 2>/dev/null; do
+          echo "PostgreSQL is unavailable - sleeping..."
+          sleep 2
+        done
+
+        echo "Checking Alembic migrations..."
+        if [ -z "$(alembic history 2>/dev/null)" ]; then
+          echo "No migrations found. Generating initial migration..."
+          alembic revision --autogenerate -m "create initial tables"
+        fi
+
+        echo "Applying migrations..."
+        alembic upgrade head
+
+        echo "Seeding database..."
+        python seed_data.py
+
+        echo "Migrations and seed completed."
+
+  api:
+    build: .
+    container_name: cosmetology_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+    ports:
+      - "8001:8001"
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+
+volumes:
+  redis_data:

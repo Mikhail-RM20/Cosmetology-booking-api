@@ -1,5 +1,4 @@
 from fastapi.security import OAuth2PasswordBearer
-
 from utils import WorkTokens
 
 # Используем oauth2_scheme для зависимости, чтобы достать токен из заголовка.

@@ -1,12 +1,11 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from database import get_db
 from dependencies import get_role_person
+from fastapi import APIRouter, Depends, Query, status
 from schemas import Entries
+from sqlalchemy.ext.asyncio import AsyncSession
 from src import get_entries
 
 router = APIRouter()
@@ -19,11 +18,8 @@ router = APIRouter()
 )
 async def cosmetology_get_entries(
     token: Annotated[str, Depends(get_role_person)],
-    date: datetime | None = Query(
-        default=None,
-        examples=["2026-09-10"],
-    ),
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    date: Annotated[datetime | None, Query(examples=["2026-09-10"])] = None,
 ):
     results = await get_entries(db=db, entries_date=date)
     return [

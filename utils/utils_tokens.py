@@ -2,12 +2,11 @@ import hashlib
 from datetime import UTC, datetime, timedelta
 
 import jwt
+from core import config_set
+from database import TokenUser
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core import config_set
-from database import TokenUser
 
 # Класс, для работы с токенами.
 # Метод 1: создает пару access и refresh токенов.
@@ -22,7 +21,9 @@ class WorkTokens:
 
         self.secret_key = config_set.secret_key
         self.algorithm = config_set.algorithm
-        self.access_token_expire_minutes = config_set.access_token_expire_minutes
+        self.access_token_expire_minutes = (
+            config_set.access_token_expire_minutes
+        )
         self.refresh_token_expire_days = config_set.refresh_token_expire_days
 
     async def pair_generation_access_refresh(
@@ -41,7 +42,8 @@ class WorkTokens:
             access = {
                 "sub": str(id_user),
                 "iat": now,
-                "exp": now + timedelta(minutes=self.access_token_expire_minutes),
+                "exp": now
+                + timedelta(minutes=self.access_token_expire_minutes),
                 "type": "access",
             }
 
@@ -54,7 +56,9 @@ class WorkTokens:
 
             # Подписываем access и refresh, по секретному ключу и алгоритму.
 
-            access_token = jwt.encode(access, self.secret_key, algorithm=self.algorithm)
+            access_token = jwt.encode(
+                access, self.secret_key, algorithm=self.algorithm
+            )
             refresh_token = jwt.encode(
                 refresh, self.secret_key, algorithm=self.algorithm
             )
@@ -68,7 +72,8 @@ class WorkTokens:
                 TokenUser(
                     user_id=id_user,
                     token_hash=refresh_token_hash,
-                    expires_at=now + timedelta(days=self.refresh_token_expire_days),
+                    expires_at=now
+                    + timedelta(days=self.refresh_token_expire_days),
                     is_working=True,
                 )
             )
@@ -118,7 +123,8 @@ class WorkTokens:
 
         except jwt.ExpiredSignatureError as error:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Access - токен истек."
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access - токен истек.",
             ) from error
 
         except jwt.InvalidSignatureError as error:
@@ -146,7 +152,9 @@ class WorkTokens:
             now = datetime.now(UTC)
 
             # Хешируем старый токен, чтобы сравнить его с токкеном из БД.
-            old_token_hash = hashlib.sha256(refresh_token.encode("utf-8")).hexdigest()
+            old_token_hash = hashlib.sha256(
+                refresh_token.encode("utf-8")
+            ).hexdigest()
 
             # Получаем старый refresh-токен.
             result = await db.execute(
@@ -182,7 +190,8 @@ class WorkTokens:
             access = {
                 "sub": str(user_id),
                 "iat": now,
-                "exp": now + timedelta(minutes=self.access_token_expire_minutes),
+                "exp": now
+                + timedelta(minutes=self.access_token_expire_minutes),
                 "type": "access",
             }
             refresh = {
@@ -192,7 +201,9 @@ class WorkTokens:
                 "type": "refresh",
             }
 
-            access_token = jwt.encode(access, self.secret_key, algorithm=self.algorithm)
+            access_token = jwt.encode(
+                access, self.secret_key, algorithm=self.algorithm
+            )
             refresh_token = jwt.encode(
                 refresh, self.secret_key, algorithm=self.algorithm
             )
@@ -218,7 +229,8 @@ class WorkTokens:
 
         except jwt.ExpiredSignatureError as error:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Access - токен истек."
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access - токен истек.",
             ) from error
 
         except jwt.InvalidSignatureError as error:

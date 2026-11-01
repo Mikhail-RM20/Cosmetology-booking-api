@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, time
 
 from sqlalchemy import (
     Boolean,
@@ -19,7 +19,9 @@ from database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
     name: Mapped[str] = mapped_column(String, nullable=False)
     surname: Mapped[str] = mapped_column(String, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)
@@ -45,7 +47,9 @@ class User(Base):
 class Procedures(Base):
     __tablename__ = "procedures"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=True,
@@ -68,7 +72,9 @@ class Procedures(Base):
 class TokenUser(Base):
     __tablename__ = "token_users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
@@ -85,7 +91,9 @@ class TokenUser(Base):
         server_default=func.now(),
         nullable=False,
     )
-    is_working: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_working: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
 
     user: Mapped["User"] = relationship(back_populates="tokens")
 
@@ -102,20 +110,24 @@ class EntryCosmetology(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     procedure_id: Mapped[int] = mapped_column(
         ForeignKey("procedures.id", ondelete="CASCADE"), nullable=False
     )
-    entry_date: Mapped[Date] = mapped_column(Date, nullable=False)
-    entry_time: Mapped[Time] = mapped_column(Time, nullable=False)
+    entry_date: Mapped[date] = mapped_column(Date, nullable=False)
+    entry_time: Mapped[time] = mapped_column(Time, nullable=False)
 
     user: Mapped["User"] = relationship(
         back_populates="entries",
     )
-    procedure: Mapped["Procedures"] = relationship(back_populates="entries_cosmetology")
+    procedure: Mapped["Procedures"] = relationship(
+        back_populates="entries_cosmetology"
+    )
 
 
 class Category(Base):

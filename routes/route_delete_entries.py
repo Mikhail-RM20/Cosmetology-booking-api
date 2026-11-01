@@ -1,21 +1,23 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from database import get_db
 from dependencies import get_role_person
+from fastapi import APIRouter, Depends
 from schemas import Entries
+from sqlalchemy.ext.asyncio import AsyncSession
 from src import delete_entries
 
 router = APIRouter()
 
 
-@router.delete("/cosmetology/delete_entries/{id_entry}", response_model=Entries)
+@router.delete(
+    "/cosmetology/delete_entries/{id_entry}",
+    response_model=Entries
+)
 async def cosmetology_delete_entries(
     token: Annotated[str, Depends(get_role_person)],
     id_entry: int,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     result = await delete_entries(db=db, id_entry=id_entry)
 

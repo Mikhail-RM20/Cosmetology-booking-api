@@ -5,6 +5,7 @@ from .route_login import router as login_route
 from .route_new_entry import router as new_entry_route
 from .route_registration import router as registration_route
 from .route_rotation import router as rotation_route
+from .route_get_categories import router as get_categories_route
 
 __all__ = [
     "delete_entries_route_delete",
@@ -14,4 +15,5 @@ __all__ = [
     "new_entry_route",
     "registration_route",
     "rotation_route",
+    "get_categories_route",
 ]

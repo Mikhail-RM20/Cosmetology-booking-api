@@ -26,7 +26,9 @@ class EntryIn(BaseModel):
         today = date.today()
         max_date = today + timedelta(days=30)
         if v < today:
-            raise ValueError("Дата бронирования должна быть сегодня или позже.")
+            raise ValueError(
+                "Дата бронирования должна быть сегодня или позже."
+            )
         if v > max_date:
             raise ValueError(
                 "Дата бронирования должна быть не позднее, чем через 30 дней с сегодняшнего дня."
@@ -38,7 +40,9 @@ class EntryIn(BaseModel):
     @classmethod
     def validate_booking_time(cls, v: time) -> time:
         if v not in ENTRY_TIMES:
-            raise ValueError("Время бронирования должно быть с 10:00 до 19:00.")
+            raise ValueError(
+                "Время бронирования должно быть с 10:00 до 19:00."
+            )
         return v
 
 

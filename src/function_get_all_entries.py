@@ -1,12 +1,11 @@
 from datetime import date
 
+from database import EntryCosmetology
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-
-from database import EntryCosmetology
 
 
 async def get_entries(
@@ -32,5 +31,6 @@ async def get_entries(
 
     except SQLAlchemyError as error:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Ошибка БД."
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка БД.",
         ) from error

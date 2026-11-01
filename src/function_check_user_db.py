@@ -1,11 +1,10 @@
+from core import verify_password
+from database import User
 from fastapi import HTTPException, status
+from schemas import LogIn
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core import verify_password
-from database import User
-from schemas import LogIn
 
 
 async def get_user_db(db: AsyncSession, user_info: LogIn) -> int:
@@ -13,7 +12,9 @@ async def get_user_db(db: AsyncSession, user_info: LogIn) -> int:
         phone = user_info.phone
         password = user_info.password
 
-        get_password = await db.execute(select(User).where(User.phone == phone))
+        get_password = await db.execute(
+            select(User).where(User.phone == phone)
+        )
         result_get_password = get_password.scalar_one_or_none()
         if result_get_password is None:
             raise HTTPException(
@@ -26,7 +27,8 @@ async def get_user_db(db: AsyncSession, user_info: LogIn) -> int:
         )
         if not verify_check_password:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный пароль."
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Неверный пароль.",
             )
 
         return result_get_password.id

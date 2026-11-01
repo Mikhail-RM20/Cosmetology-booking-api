@@ -1,11 +1,10 @@
+from core import hash_password
+from database import User
 from fastapi import HTTPException, status
+from schemas import RegistrationIn
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core import hash_password
-from database import User
-from schemas import RegistrationIn
 
 
 async def create_new_user(db: AsyncSession, user_info: RegistrationIn) -> int:

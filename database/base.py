@@ -1,9 +1,12 @@
 from collections.abc import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import declarative_base
-
 from core import config_set
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import declarative_base
 
 # Создаем асинхронный движок для подключения к PostgreSQL.
 engine = create_async_engine(config_set.database_url, echo=True)

@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-
 from routes import (
     delete_entries_route_delete,
     get_all_entry_route,
@@ -8,6 +7,7 @@ from routes import (
     new_entry_route,
     registration_route,
     rotation_route,
+    get_categories_route
 )
 
 app = FastAPI()
@@ -19,3 +19,5 @@ app.include_router(login_route)
 app.include_router(new_entry_route)
 app.include_router(registration_route)
 app.include_router(rotation_route)
+app.include_router(get_categories_route)
+

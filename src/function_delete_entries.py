@@ -1,10 +1,9 @@
+from database import EntryCosmetology
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-
-from database import EntryCosmetology
 
 
 async def delete_entries(
