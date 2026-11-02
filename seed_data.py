@@ -1,4 +1,5 @@
 import asyncio
+
 from core import config_set, hash_password
 from database import Category, Procedures, SessionLocal, User
 from utils import WorkTokens
@@ -276,6 +277,7 @@ async def generate_base_table():
         )
 
         await session.commit()
+
 
 async def main() -> None:
     await generate_base_table()

@@ -1,13 +1,18 @@
 from typing import Annotated
-
+from core import dict_config
 from database import get_db
 from dependencies import get_current_access_token, oauth2_scheme
 from fastapi import APIRouter, Depends, status
 from schemas import EntryIn, EntryOut
 from sqlalchemy.ext.asyncio import AsyncSession
 from src import new_entry
+import logging.config
 
 router = APIRouter()
+
+logging.config.dictConfig(dict_config)
+main_log = logging.getLogger("route_logger")
+main_log.setLevel(logging.DEBUG)
 
 
 @router.post(
@@ -20,6 +25,21 @@ async def cosmetology_new_entry(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
+    """
+    Роут создания новой записи.
+
+    Args:
+        entry_data: EntryIn - Pydantic модель включающая в себя:
+            procedure_id: int - ID процедуры.
+            entry_date: date - Дата записи на процедуру.
+            entry_time: time - Время записи на процедуру.
+
+        token: str - Access - токен пользователя.
+        db: AsyncSession - Асинхронная БД.
+
+    Returns:
+        EntryOut - Pydantic модель включающая в себя:
+    """
     user_id = await get_current_access_token(token=token)
     create_entry = await new_entry(
         db=db, entry_data=entry_data, id_user=user_id

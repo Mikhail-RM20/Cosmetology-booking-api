@@ -1,14 +1,13 @@
 import json
 
+from core import redis_client
+from database import Category
 from fastapi import HTTPException, status
 from redis import RedisError
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core import redis_client
-from database import Category
+from sqlalchemy.orm import selectinload
 
 
 async def get_categories_data(
@@ -32,9 +31,7 @@ async def get_categories_data(
 
     # 2. Запрашиваем категории из БД.
     try:
-        query = select(Category).options(
-            selectinload(Category.procedures)
-        )
+        query = select(Category).options(selectinload(Category.procedures))
 
         if category_id is not None:
             query = query.where(Category.id == category_id)

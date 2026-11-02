@@ -5,7 +5,7 @@ import jwt
 from core import config_set
 from database import TokenUser
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Класс, для работы с токенами.
@@ -67,6 +67,15 @@ class WorkTokens:
             refresh_token_hash = hashlib.sha256(
                 refresh_token.encode("utf-8")
             ).hexdigest()
+
+            await db.execute(
+                update(TokenUser)
+                .where(
+                    TokenUser.user_id == id_user,
+                    TokenUser.is_working.is_(True),
+                )
+                .values(is_working=False)
+            )
 
             db.add(
                 TokenUser(
