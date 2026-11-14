@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ beauty-booking-api ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ beauty-booking-api ]
 
 jobs:
   quality-and-tests:
