@@ -1,6 +1,6 @@
-from core import dict_config
 import logging.config
 
+from core import dict_config
 from fastapi.security import OAuth2PasswordBearer
 from utils import WorkTokens
 

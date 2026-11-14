@@ -21,8 +21,8 @@ dict_config = {
             "level": "INFO",
             "formatter": "base",
             "filename": str(LOG_DIR / "routes.log"),
-            "encoding": "utf-8", # Кодировка для RU сообщений.
-            "maxBytes": 10 * 1024 * 1024, # Лимит размера файла.
+            "encoding": "utf-8",  # Кодировка для RU сообщений.
+            "maxBytes": 10 * 1024 * 1024,  # Лимит размера файла.
             "backupCount": 5,  # Храним 5 файлов, старые удаляются.
         },
         "file_services": {

@@ -1,17 +1,20 @@
-from typing import Annotated
 import logging.config
+from typing import Annotated
+
+from core import dict_config
 from database import get_db
 from dependencies import get_current_access_token, oauth2_scheme
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from schemas import CategoryOut, ProcedureOut
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.function_get_categories import get_categories_data
-from core import dict_config
+
 router = APIRouter()
 
 logging.config.dictConfig(dict_config)
 main_log = logging.getLogger("route_logger")
 main_log.setLevel(logging.DEBUG)
+
 
 @router.get(
     "/cosmetology/categories",
@@ -67,7 +70,7 @@ async def get_categories(
             detail="Категории не найдены.",
         )
 
-    main_log.debug("Роут /cosmetology/categories успешно завершил выполнение.")
+    main_log.info("Роут /cosmetology/categories успешно завершил выполнение.")
     return [
         CategoryOut(
             id=category["id"],

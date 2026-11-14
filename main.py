@@ -5,17 +5,21 @@ from routes import (
     get_categories_route,
     get_procedures_route,
     login_route,
+    me_route,
+    my_entries_route,
     new_entry_route,
     registration_route,
     rotation_route,
 )
 
-app = FastAPI()
+app = FastAPI(title="Cosmetology Booking API")
 
 app.include_router(delete_entries_route_delete)
 app.include_router(get_all_entry_route)
 app.include_router(get_procedures_route)
 app.include_router(login_route)
+app.include_router(me_route)
+app.include_router(my_entries_route)
 app.include_router(new_entry_route)
 app.include_router(registration_route)
 app.include_router(rotation_route)

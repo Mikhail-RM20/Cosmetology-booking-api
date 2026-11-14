@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Clinic — Косметология и уход</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://googleapis.com" rel="stylesheet">
+</head>
+<body>
+    <!-- Уведомления (Toast) -->
+    <div id="toast-container"></div>
+
+    <!-- Шапка сайта -->
+    <header class="header">
+        <div class="container header-inner">
+            <div class="logo">
+                <span class="logo-accent">AESTHETIC</span> CLINIC
+            </div>
+            <nav class="nav" id="nav-menu">
+                <!-- Заполняется динамически через JS в зависимости от роли -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Блок авторизации / регистрации (показывается гостям) -->
+        <section id="auth-section" class="auth-wrapper">
+            <div class="hero-text">
+                <h1>Искусство естественной красоты и здоровья кожи</h1>
+                <p>Персональный подбор косметологических процедур и онлайн-запись к ведущему специалисту клиники — Ивану Игоревичу.</p>
+            </div>
+
+            <div class="auth-card">
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">Вход</button>
+                    <button class="tab-btn" data-tab="register">Регистрация</button>
+                </div>
+
+                <!-- Форма входа -->
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label>Номер телефона</label>
+                        <input type="text" id="login-phone" placeholder="+79000000000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" id="login-password" placeholder="Минимум 8 символов" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Войти в кабинет</button>
+                </form>
+
+                <!-- Форма регистрации -->
+                <form id="register-form" class="auth-form hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Имя</label>
+                            <input type="text" id="reg-name" placeholder="Мария" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Фамилия</label>
+                            <input type="text" id="reg-surname" placeholder="Иванова" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Номер телефона</label>
+                        <input type="text" id="reg-phone" placeholder="+79991234567" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="reg-email" placeholder="maria@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" id="reg-password" placeholder="Минимум 8 символов" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Создать аккаунт</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Кабинет обычного клиента (role === 'user') -->
+        <section id="client-section" class="dashboard hidden">
+            <div class="dashboard-tabs">
+                <button class="dash-tab active" data-view="catalog">Услуги и запись</button>
+                <button class="dash-tab" data-view="my-entries">Мои записи</button>
+                <button class="dash-tab" data-view="profile">Мой профиль</button>
+            </div>
+
+            <!-- Вкладка: Каталог процедур -->
+            <div id="catalog-view" class="view-panel">
+                <div class="category-filters" id="category-filters"></div>
+                <div class="procedures-grid" id="procedures-grid"></div>
+            </div>
+
+            <!-- Вкладка: Мои записи -->
+            <div id="my-entries-view" class="view-panel hidden">
+                <h2>Ваши предстоящие визиты</h2>
+                <div class="entries-list" id="my-entries-list"></div>
+            </div>
+
+            <!-- Вкладка: Личный кабинет (профиль пользователя) -->
+            <div id="profile-view" class="view-panel hidden">
+                <h2 style="margin-bottom: 20px;">Личные данные</h2>
+                <div class="profile-card" id="client-profile-card"></div>
+            </div>
+        </section>
+
+        <!-- Панель администратора (role === 'admin') -->
+        <section id="admin-section" class="dashboard hidden">
+            <div class="admin-header">
+                <h2>Панель управления записями</h2>
+                <div class="admin-controls">
+                    <input type="date" id="admin-date-filter" class="date-input">
+                    <button id="admin-reset-date" class="btn btn-outline">Показать все</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Дата</th>
+                            <th>Время</th>
+                            <th>Клиент</th>
+                            <th>Процедура</th>
+                            <th>Стоимость</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-entries-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Модальное окно записи на процедуру -->
+    <div id="booking-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close">&times;</span>
+            <h3 id="modal-proc-title">Запись на процедуру</h3>
+            <p class="modal-price" id="modal-proc-price"></p>
+            <form id="booking-form">
+                <input type="hidden" id="booking-proc-id">
+                <div class="form-group">
+                    <label>Выберите дату (на ближайшие 30 дней)</label>
+                    <input type="date" id="booking-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Выберите свободное время</label>
+                    <select id="booking-time" required>
+                        <option value="10:00:00">10:00</option>
+                        <option value="11:00:00">11:00</option>
+                        <option value="12:00:00">12:00</option>
+                        <option value="13:00:00">13:00</option>
+                        <option value="14:00:00">14:00</option>
+                        <option value="15:00:00">15:00</option>
+                        <option value="16:00:00">16:00</option>
+                        <option value="17:00:00">17:00</option>
+                        <option value="18:00:00">18:00</option>
+                        <option value="19:00:00">19:00</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Подтвердить запись</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

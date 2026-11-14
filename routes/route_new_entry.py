@@ -1,4 +1,6 @@
+import logging.config
 from typing import Annotated
+
 from core import dict_config
 from database import get_db
 from dependencies import get_current_access_token, oauth2_scheme
@@ -6,7 +8,6 @@ from fastapi import APIRouter, Depends, status
 from schemas import EntryIn, EntryOut
 from sqlalchemy.ext.asyncio import AsyncSession
 from src import new_entry
-import logging.config
 
 router = APIRouter()
 
@@ -40,9 +41,21 @@ async def cosmetology_new_entry(
     Returns:
         EntryOut - Pydantic модель включающая в себя:
     """
+    main_log.debug("Получен запрос на создание записи в косметологии")
     user_id = await get_current_access_token(token=token)
     create_entry = await new_entry(
         db=db, entry_data=entry_data, id_user=user_id
+    )
+
+    main_log.info(
+        "Создана запись в косметологии",
+        extra={
+            "user_id": user_id,
+            "entry_id": create_entry.get("id"),
+            "procedure_id": create_entry.get("procedure_id"),
+            "entry_date": create_entry["entry_date"].isoformat(),
+            "entry_time": create_entry["entry_time"].isoformat(),
+        },
     )
 
     return EntryOut(

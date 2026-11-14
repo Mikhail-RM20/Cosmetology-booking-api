@@ -1,8 +1,9 @@
 from .schemas_category import CategoryOut
-from .schemas_entry import Entries, EntryIn, EntryOut
+from .schemas_entry import Entries, EntryIn, EntryOut, MyEntryOut
 from .schemas_login import LogIn, LogOut
 from .schemas_procedure import ProcedureOut
 from .schemas_registration import RegistrationIn, RegistrationOut
+from .schemas_user import UserOut
 from .shemas_token import TokenRefreshIn
 
 __all__ = [
@@ -16,4 +17,6 @@ __all__ = [
     "RegistrationIn",
     "RegistrationOut",
     "TokenRefreshIn",
+    "UserOut",
+    "MyEntryOut",
 ]

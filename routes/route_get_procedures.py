@@ -1,4 +1,6 @@
+import logging.config
 from typing import Annotated
+
 from core import dict_config
 from database import get_db
 from dependencies import get_current_access_token, oauth2_scheme
@@ -6,13 +8,13 @@ from fastapi import APIRouter, Depends, status
 from schemas import ProcedureOut
 from sqlalchemy.ext.asyncio import AsyncSession
 from src import get_procedures
-import logging.config
 
 router = APIRouter()
 
 logging.config.dictConfig(dict_config)
 main_log = logging.getLogger("route_logger")
 main_log.setLevel(logging.DEBUG)
+
 
 @router.get(
     "/cosmetology/procedures/{procedure_id}",
@@ -45,7 +47,9 @@ async def cosmetology_procedures(
       status_code: 200 - успешно выполненный запрос.
 
     """
-    main_log.debug("Роут /cosmetology/procedures/%s получил запрос.", procedure_id)
+    main_log.debug(
+        "Роут /cosmetology/procedures/%s получил запрос.", procedure_id
+    )
     await get_current_access_token(token=token)
 
     procedure = await get_procedures(
@@ -53,7 +57,10 @@ async def cosmetology_procedures(
         procedure_id=procedure_id,
     )
 
-    main_log.debug("Роут /cosmetology/procedures/%s успешно завершил выполнение.", procedure_id)
+    main_log.info(
+        "Роут /cosmetology/procedures/%s успешно завершил выполнение.",
+        procedure_id,
+    )
     return ProcedureOut(
         id=procedure["id"],
         name=procedure["name_procedure"],

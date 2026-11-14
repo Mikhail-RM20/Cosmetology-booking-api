@@ -1,5 +1,6 @@
-from typing import Annotated
 import logging.config
+from typing import Annotated
+
 from core import dict_config
 from database import User, get_db
 from fastapi import Depends, HTTPException, status
@@ -13,6 +14,7 @@ from dependencies import get_current_access_token, oauth2_scheme
 logging.config.dictConfig(dict_config)
 main_log = logging.getLogger("services_logger")
 main_log.setLevel(logging.DEBUG)
+
 
 async def get_role_person(
     token: Annotated[str, Depends(oauth2_scheme)],
@@ -40,8 +42,9 @@ async def get_role_person(
         main_log.debug("Начало проверки переданного токена.")
         user_id = await get_current_access_token(token=token)
 
-        main_log.debug("Успешная проверка на актуальность токена."
-                       "Выполняется запрос к БД.")
+        main_log.debug(
+            "Успешная проверка на актуальность токена.Выполняется запрос к БД."
+        )
         check_role = await db.execute(
             select(User).where(User.id == user_id, User.role == "admin")
         )

@@ -2,11 +2,17 @@ import asyncio
 
 from core import config_set, hash_password
 from database import Category, Procedures, SessionLocal, User
+from sqlalchemy import select
 from utils import WorkTokens
 
 
 async def generate_base_table():
     async with SessionLocal() as session:
+        # Проверяем, заполнена ли уже база
+        existing_category = await session.scalar(select(Category).limit(1))
+        if existing_category is not None:
+            return
+
         category_list = [
             Category(name="Чистка лица"),
             Category(name="Пилинг"),

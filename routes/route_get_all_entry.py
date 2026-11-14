@@ -1,18 +1,21 @@
+import logging.config
 from datetime import datetime
 from typing import Annotated
-import logging.config
+
+from core import dict_config
 from database import get_db
 from dependencies import get_role_person
 from fastapi import APIRouter, Depends, Query, status
 from schemas import Entries
 from sqlalchemy.ext.asyncio import AsyncSession
 from src import get_entries
-from core import dict_config
+
 router = APIRouter()
 
 logging.config.dictConfig(dict_config)
 main_log = logging.getLogger("route_logger")
 main_log.setLevel(logging.DEBUG)
+
 
 @router.get(
     "/cosmetology/get_entries",
@@ -50,7 +53,7 @@ async def cosmetology_get_entries(
     """
     main_log.debug("Роут /cosmetology/get_entries получил запрос.")
     results = await get_entries(db=db, entries_date=date)
-    main_log.debug("Роут /cosmetology/get_entries успешно завершил работу.")
+    main_log.info("Роут /cosmetology/get_entries успешно завершил работу.")
     return [
         Entries(
             id=entry.id,

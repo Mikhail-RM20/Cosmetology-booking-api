@@ -1,5 +1,6 @@
-from typing import Annotated
 import logging.config
+from typing import Annotated
+
 from core import dict_config
 from database import get_db
 from dependencies import get_role_person
@@ -13,6 +14,7 @@ router = APIRouter()
 logging.config.dictConfig(dict_config)
 main_log = logging.getLogger("route_logger")
 main_log.setLevel(logging.DEBUG)
+
 
 @router.delete(
     "/cosmetology/delete_entries/{id_entry}", response_model=Entries
@@ -50,9 +52,9 @@ async def cosmetology_delete_entries(
     )
     result = await delete_entries(db=db, id_entry=id_entry)
 
-    main_log.debug(
-        "Роут /cosmetology/delete_entries/%s"
-        "успешно завершил свое выполнение.", id_entry
+    main_log.info(
+        "Роут /cosmetology/delete_entries/%sуспешно завершил свое выполнение.",
+        id_entry,
     )
     return Entries(
         id=result["id"],

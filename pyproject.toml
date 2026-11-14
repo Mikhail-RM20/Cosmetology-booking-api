@@ -11,7 +11,7 @@ exclude = [
 
 fix = true
 indent-width = 4
-src = ["core", "database", "dependencies", "routes", "schemas", "src", "utils", 'tests' ]
+src = ["core", "database", "dependencies", "routes", "schemas", "src", "utils", 'tests', "alembic" ]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N"]
@@ -20,7 +20,8 @@ ignore = [
     "F841",
     "E712",
     "E501",
-    "W505"
+    "W505",
+    "W291"
 ]
 
 fixable = ["ALL"]

@@ -16,7 +16,39 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class WorkTokens:
+    """
+    Класс для работы с access и refresh токенами пользователя.
+
+    Отвечает за:
+        - Генерацию пары access и refresh токенов.
+        - Проверку access токена.
+        - Обновление токенов через refresh токен.
+        - Сохранение хеша активного refresh токена в базе данных.
+
+    Attributes:
+        secret_key: str - Секретный ключ для подписи токенов.
+        algorithm: str - Алгоритм подписи JWT.
+        access_token_expire_minutes: int - Время жизни access токена в минутах.
+        refresh_token_expire_days: int - Время жизни refresh токена в днях.
+
+    Methods:
+        pair_generation_access_refresh: Создает новую пару токенов.
+        check_access_token: Проверяет access токен и возвращает id пользователя.
+        rotation_tokens: Обновляет пару токенов по refresh токену.
+
+    Подробнее: /utils/utils_tokens.py
+    """
+
     def __init__(self):
+        """
+        Инициализирует настройки для работы с токенами.
+
+        Attributes:
+            secret_key: str - Секретный ключ из Pydantic-settings.
+            algorithm: str - Алгоритм подписи JWT.
+            access_token_expire_minutes: int - Время жизни access токена.
+            refresh_token_expire_days: int - Время жизни refresh токена.
+        """
         # Берем данные из Pydantic-settings
 
         self.secret_key = config_set.secret_key
@@ -29,6 +61,26 @@ class WorkTokens:
     async def pair_generation_access_refresh(
         self, db: AsyncSession, id_user: int
     ) -> tuple[str, str]:
+        """
+        Создает новую пару access и refresh токенов для пользователя.
+
+        Деактивирует все ранее активные refresh токены пользователя,
+        создает новый активный refresh токен и сохраняет его хеш в БД.
+
+        Args:
+            db: AsyncSession - Асинхронная сессия базы данных.
+            id_user: int - ID пользователя, для которого создаются токены.
+
+        Returns:
+            tuple[str, str] - Пара токенов пользователя:
+                access_token: str - Access-токен пользователя.
+                refresh_token: str - Refresh-токен пользователя.
+
+        Raises:
+            HTTPException 500 - Некорректный секретный ключ.
+            HTTPException 500 - Неподдерживаемый алгоритм подписи.
+            HTTPException 500 - Отсутствует необходимая библиотека cryptography.
+        """
 
         # "sub" - subject, сохраняет id - пользователя.
         # "iat" - issued at, время создания токена.
@@ -110,6 +162,25 @@ class WorkTokens:
             ) from error
 
     def check_access_token(self, access_token: str) -> int:
+        """
+        Проверяет access токен пользователя.
+
+        Проверяет подпись, срок действия, тип токена и наличие id пользователя.
+
+        Args:
+            access_token: str - Access-токен пользователя.
+
+        Returns:
+            int - ID пользователя из access токена.
+
+        Raises:
+            HTTPException 401 - Неверный тип токена.
+            HTTPException 401 - В токене отсутствует id пользователя.
+            HTTPException 401 - Access токен истек.
+            HTTPException 401 - Подпись токена недействительна.
+            HTTPException 401 - Токен поврежден.
+            HTTPException 401 - Использован недопустимый алгоритм.
+        """
         try:
             payload = jwt.decode(
                 access_token, self.secret_key, algorithms=[self.algorithm]
@@ -157,6 +228,30 @@ class WorkTokens:
     async def rotation_tokens(
         self, db: AsyncSession, refresh_token: str
     ) -> tuple[str, str]:
+        """
+        Обновляет access и refresh токены пользователя.
+
+        Проверяет действительность старого refresh токена, деактивирует его
+        и создает новую пару access и refresh токенов. Новый refresh токен
+        сохраняет срок действия старого.
+
+        Args:
+            db: AsyncSession - Асинхронная сессия базы данных.
+            refresh_token: str - Действующий refresh токен пользователя.
+
+        Returns:
+            tuple[str, str] - Новая пара токенов пользователя:
+                access_token: str - Новый access-токен пользователя.
+                refresh_token: str - Новый refresh-токен пользователя.
+
+        Raises:
+            HTTPException 401 - Refresh токен недействителен или истёк.
+            HTTPException 401 - Неверный тип токена.
+            HTTPException 401 - В токене отсутствует id пользователя.
+            HTTPException 401 - Подпись токена недействительна.
+            HTTPException 401 - Токен поврежден.
+            HTTPException 401 - Использован недопустимый алгоритм.
+        """
         try:
             now = datetime.now(UTC)
 

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import declarative_base
 
 # Создаем асинхронный движок для подключения к PostgreSQL.
-engine = create_async_engine(config_set.database_url, echo=True)
+engine = create_async_engine(config_set.database_url)
 
 # Создаем класс для моделей ORM.
 Base = declarative_base()

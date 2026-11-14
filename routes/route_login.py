@@ -1,17 +1,19 @@
+import logging.config
 from typing import Annotated
+
 from core import dict_config
 from database import get_db
 from fastapi import APIRouter, Depends, status
 from schemas import LogIn, LogOut
 from sqlalchemy.ext.asyncio import AsyncSession
 from src import login_user
-import logging.config
 
 router = APIRouter()
 
 logging.config.dictConfig(dict_config)
 main_log = logging.getLogger("route_logger")
 main_log.setLevel(logging.DEBUG)
+
 
 @router.post(
     "/cosmetology/login",
@@ -45,8 +47,5 @@ async def cosmetology_login(
     access_token, refresh_token = await login_user(
         db=db, user_info=login_user_info
     )
-    main_log.debug("Роут /cosmetology/login успешно завершил свое выполнение.")
-    return LogOut(
-        access_token=access_token,
-        refresh_token=refresh_token
-    )
+    main_log.info("Роут /cosmetology/login успешно завершил свое выполнение.")
+    return LogOut(access_token=access_token, refresh_token=refresh_token)
